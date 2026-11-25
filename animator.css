@@ -1,0 +1,357 @@
+/* All styling for the Animator app. Its code only attaches class names. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #d4c5a0;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Left column: the code editor. */
+.code-col {
+  width: 42%;
+  min-width: 320px;
+  max-width: 720px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 1px solid #3a3a5e;
+  background: #0f0f1e;
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+.icon-btn:hover { background: #3a3a5e; }
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.code-title {
+  color: #e8d8b0;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #0d0d1a;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 8px 14px 0;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: #0d0d1a;
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: none;
+}
+.reference-summary:hover { color: #e8d8b0; }
+.reference-body {
+  padding: 4px 12px 10px;
+  border-top: 1px solid #3a3a5e;
+}
+.reference-group { margin-top: 8px; }
+.reference-group-title {
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 1px 0;
+}
+.reference-sig {
+  color: #89ddff;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #6a7a8a; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+/* Stacks the canvas above its control bar. */
+.anim-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a14;
+  container-type: size;
+}
+
+/* Why the code can't be drawn, overlaid on the cleared canvas. */
+.draw-error {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 5;
+  max-height: 40%;
+  padding: 12px 14px;
+  overflow: auto;
+  background: #2e1420;
+  border: 1px solid #c8506a;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ffd5dc;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
+
+/* ── Control panel (under the canvas) ───────────────────────────────────── */
+
+/* Three rows: the timeline, Motion Lab's statistics and overlays, and the
+   drawing's settings. Each row wraps on narrow screens. */
+.controls {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 16px 12px;
+  background: #1a1a3e;
+  border-top: 1px solid #3a3a5e;
+}
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.playback { display: flex; gap: 8px; }
+.control-btn {
+  min-width: 82px;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+}
+.control-btn:focus-visible,
+.toggle:focus-visible,
+.timeline:focus-visible,
+.slider-control input:focus-visible {
+  outline: 2px solid #8a8aca;
+  outline-offset: 2px;
+}
+
+/* The timeline: drag or use the arrow keys to move to any moment. */
+.timeline {
+  flex: 1 1 180px;
+  min-width: 120px;
+  accent-color: #89ddff;
+  cursor: pointer;
+}
+.timeline:disabled { cursor: default; opacity: 0.4; }
+.time-readout {
+  min-width: 104px;
+  color: #e8d8b0;
+  font-family: monospace;
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* A switch for a setting: dim when off, lit when on. */
+.toggle {
+  gap: 6px;
+  padding: 6px 11px;
+  font-size: 12px;
+  color: #8a8aaa;
+  background: #16162e;
+  border-color: #3a3a5e;
+}
+.toggle[aria-pressed="true"] {
+  color: #0d0d1a;
+  background: #89ddff;
+  border-color: #89ddff;
+}
+.toggle[aria-pressed="true"]:hover { background: #a8e6ff; }
+.toggles { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Live statistics: one small tile per measurement. */
+.stats {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.stat {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: auto auto;
+  align-items: baseline;
+  column-gap: 4px;
+  min-width: 84px;
+  padding: 4px 10px 5px;
+  background: #12122a;
+  border: 1px solid #2e2e52;
+  border-radius: 4px;
+}
+.stat-label {
+  grid-column: 1 / -1;
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-value {
+  color: #e8d8b0;
+  font-family: monospace;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.stat-unit { color: #6a7a8a; font-size: 11px; }
+.stat-wide { min-width: 120px; grid-template-columns: auto 1fr; }
+.meter {
+  align-self: center;
+  height: 5px;
+  margin-left: 6px;
+  overflow: hidden;
+  background: #2a2a4a;
+  border-radius: 3px;
+}
+.meter-fill { height: 100%; background: #89ddff; }
+
+/* The drawing menu and the shape and speed sliders. */
+.drawing-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.drawing-select {
+  width: 160px;
+  max-width: 100%;
+  padding: 6px 8px;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.drawing-select:hover { background: #3a3a5e; }
+.drawing-select:focus-visible {
+  outline: 2px solid #8a8aca;
+  outline-offset: 2px;
+}
+.slider-control {
+  flex: 1 1 200px;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.slider-label {
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+}
+.slider-control input {
+  flex: 1;
+  min-width: 60px;
+  accent-color: #8a8aca;
+  cursor: pointer;
+}
+.slider-value {
+  min-width: 44px;
+  color: #e8d8b0;
+  font-family: monospace;
+  font-size: 12px;
+  text-align: right;
+}
